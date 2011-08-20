@@ -1,5 +1,6 @@
 // EImonPluginWindows.h : header file
 //
+#include <ShellAPI.h>
 
 #pragma once
 
@@ -48,4 +49,5 @@ protected:
 	afx_msg void OnBnClickedButtonVfdRandomEq();
 
 	afx_msg LRESULT OnDisplayPluginNotify(WPARAM, LPARAM);
+	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

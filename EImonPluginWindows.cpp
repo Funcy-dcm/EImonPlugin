@@ -9,6 +9,36 @@
 #define new DEBUG_NEW
 #endif
 
+#define MYWM_NOTIFYICON (WM_APP + 1)
+
+BOOL TrayMessage (HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, PSTR pszTip) 
+// systray icon 
+{ 
+    BOOL res; 
+
+    NOTIFYICONDATA tnd; 
+
+    tnd.cbSize = sizeof(NOTIFYICONDATA); 
+    tnd.hWnd = hDlg; 
+    tnd.uID = uID; 
+
+    tnd.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP; 
+    tnd.uCallbackMessage = MYWM_NOTIFYICON; // Сообщение, которое пошлется при всяких там кликах на иконке... 
+    tnd.hIcon = hIcon; 
+
+    if (pszTip) 
+    { 
+        lstrcpyn(tnd.szTip, (LPCTSTR)pszTip, sizeof(tnd.szTip)); 
+    } 
+    else 
+    { 
+        tnd.szTip[0] = '\0'; 
+    } 
+
+    res = Shell_NotifyIcon(dwMessage, &tnd); 
+
+    return res; 
+}
 
 // CAboutDlg dialog used for App About
 
@@ -84,6 +114,11 @@ END_MESSAGE_MAP()
 BOOL CDisplayTestDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+ 
+	/*HICON hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	HWND hWnd = this->GetSafeHwnd();
+	BOOL ok = TrayMessage(hWnd, NIM_ADD, 0, hIcon, 0);
+	if (ok) ShowWindow(SW_HIDE);*/
 
 	// Add "About..." menu item to system menu.
 
@@ -130,15 +165,47 @@ BOOL CDisplayTestDlg::OnInitDialog()
 
 void CDisplayTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
+	HWND hWnd;		// указатель на окно 
+	HICON hIcon;	// указатель на иконку 
+//	char *szText;	// указатель на текст для подсказки 
+	BOOL ok;
+
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
+	} 
+	switch (nID & 0xFFF0) {
+    case SC_MINIMIZE:
+		hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+		hWnd = this->GetSafeHwnd();
+		ok = TrayMessage(hWnd, NIM_ADD, 0, hIcon, 0);
+		if (ok) ShowWindow(SW_HIDE);
+        break;
+	case MYWM_NOTIFYICON:
+		hWnd = this->GetSafeHwnd();
+		TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
+		ShowWindow(SW_SHOW);
+		break;
+    default:
+        CDialog::OnSysCommand(nID, lParam);
+    }
+}
+
+LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	HWND hWnd;
+	switch(msg) {
+	case MYWM_NOTIFYICON:
+		switch(lParam) {
+		case WM_LBUTTONDBLCLK:
+			hWnd = this->GetSafeHwnd();
+			TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
+			ShowWindow(SW_SHOW);
+			break;
+		}
+		break;
 	}
-	else
-	{
-		CDialog::OnSysCommand(nID, lParam);
-	}
+	return CDialog::DefWindowProc(msg, wParam, lParam);
 }
 
 // If you add a minimize button to your dialog, you will need the code below
