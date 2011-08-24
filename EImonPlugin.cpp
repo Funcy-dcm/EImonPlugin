@@ -7,8 +7,9 @@
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
-
 
 // CDisplayTestApp
 
@@ -35,6 +36,12 @@ CDisplayTestApp theApp;
 
 BOOL CDisplayTestApp::InitInstance()
 {
+	if (!AfxSocketInit())
+	{
+		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
+		return FALSE;
+	}
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -56,7 +63,7 @@ BOOL CDisplayTestApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(L"Local AppWizard-Generated Applications");
 
 	CDisplayTestDlg dlg;
 	m_pMainWnd = &dlg;

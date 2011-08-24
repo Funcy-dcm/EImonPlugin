@@ -1,16 +1,22 @@
 // EImonPluginWindows.h : header file
 //
 #include <ShellAPI.h>
+#include "IMAP.h"
+#include "resource.h"
 
 #pragma once
 
 #define WM_DSP_PLUGIN_NOTIFY	WM_APP + 1001
+
+typedef enum {TIME=0,EMAIL1,EMAIL2} VIEWVFD;
 
 // CDisplayTestDlg dialog
 class CDisplayTestDlg : public CDialog
 {
 // Construction
 public:
+	CPop3 pop3;
+	CString EMAIL[2];
 	CDisplayTestDlg(CWnd* pParent = NULL);	// standard constructor
 
 // Dialog Data
@@ -50,4 +56,9 @@ protected:
 
 	afx_msg LRESULT OnDisplayPluginNotify(WPARAM, LPARAM);
 	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+
+	afx_msg void OnConnImap();
+private:
+	VIEWVFD viewvfd;
+
 };

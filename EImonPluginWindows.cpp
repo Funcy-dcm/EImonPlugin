@@ -4,9 +4,12 @@
 #include "stdafx.h"
 #include "EImonPlugin.h"
 #include "EImonPluginWindows.h"
+#include "IMAP.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #define MYWM_NOTIFYICON (WM_APP + 1)
@@ -78,12 +81,13 @@ CDisplayTestDlg::CDisplayTestDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	
-	m_strLine1 = _T("");
-	m_strLine2 = _T("");
+	m_strLine1 = L"";
+	m_strLine2 = L"";
 
 	m_uEqTimer = 0;
 	m_uEqTimer2 = 0;
 	m_bVfdConnected = FALSE;
+	viewvfd = TIME;
 }
 
 void CDisplayTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -144,8 +148,8 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_strLine1 = _T("Привет Котёнок!");
-	m_strLine2 = _T("iMON Display API");
+	m_strLine1 = L"Привет котёнок!";
+	m_strLine2 = L"iMON Display API";
 
 	UpdateControlUI();
 
@@ -157,8 +161,12 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	}
 
 	UpdateData(FALSE);
+	
+	EMAIL[0] = L"Funcy";
+	EMAIL[1] = L"Alis";
 
 	Init();
+				//SetTimer(103, 10000, NULL);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -253,6 +261,11 @@ void CDisplayTestDlg::OnDestroy()
 
 void CDisplayTestDlg::OnTimer(UINT nIDEvent) 
 {
+	CString str1;
+	CString str2;
+	CString str3;
+	CString str4;
+	int length;
 	if(nIDEvent == 101)
 	{
 		DSPEQDATA eqData;
@@ -261,27 +274,48 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			eqData.BandData[i] = rand()%100;
 		}
 		IMON_Display_SetVfdEqData(&eqData);
-	}
-	else if(nIDEvent == 102)
-	{
+	} else if((nIDEvent == 102) && (viewvfd == TIME)) {
 		SYSTEMTIME sm;
 		GetLocalTime(&sm);
-		CString str1;
-		CString str2;
-		CString str3;
 		switch(sm.wDayOfWeek) {
-			case 1: str3 = _T("Пн"); break;
-			case 2: str3 = _T("Вт"); break;
-			case 3: str3 = _T("Ср"); break;
-			case 4: str3 = _T("Чт"); break;
-			case 5: str3 = _T("Пт"); break;
-			case 6: str3 = _T("Сб"); break;
-			case 7: str3 = _T("Вс"); break;
+			case 1: str3 = L"Пн"; break;
+			case 2: str3 = L"Вт"; break;
+			case 3: str3 = L"Ср"; break;
+			case 4: str3 = L"Чт"; break;
+			case 5: str3 = L"Пт"; break;
+			case 6: str3 = L"Сб"; break;
+			case 0: str3 = L"Вс"; break;
 		}
-		str1.Format(_T(" %02d.%02d.%04d %s"), sm.wDay, sm.wMonth, sm.wYear, str3);
-		str2.Format(_T("    %02d:%02d:%02d"), sm.wHour, sm.wMinute, sm.wSecond);
-
+		str1.Format(L" %02d.%02d.%04d %s", sm.wDay, sm.wMonth, sm.wYear, str3);
+		str2.Format(L"    %02d:%02d:%02d", sm.wHour, sm.wMinute, sm.wSecond);
 		IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+	} else if(nIDEvent == 103) {
+		switch(viewvfd) {
+			case TIME: 
+				str3 = L"                ";
+				length = (16 - EMAIL[0].GetLength())/2;
+				if ((length>0) && (length<16)) str1 = str3.Left(length);
+				str1.AppendFormat(EMAIL[0]);
+				str4.Format(L"%d", pop3.GetNumMsg());
+				length = (16 - str4.GetLength())/2;
+				if ((length>0) && (length<16)) str2 = str3.Left(length);
+				str2.AppendFormat(L"%d", pop3.GetNumMsg());
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+				viewvfd = EMAIL1;
+				break;
+			case EMAIL1:
+				str1.Format(EMAIL[1]);
+				str2.Format(L"%d", 0);
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+				viewvfd = EMAIL2;
+				break;
+			case EMAIL2:
+
+				viewvfd = TIME;
+				break;
+		}
+	} else if(nIDEvent == 104) {
+		pop3.SendCntNewMsg();
 	}
 	CDialog::OnTimer(nIDEvent);
 }
@@ -304,12 +338,12 @@ void CDisplayTestDlg::OnBnClickedButtonVfdRandomEq()
 	if(m_uEqTimer)
 	{	
 		KillTimer(101);		m_uEqTimer = 0;		
-		GetDlgItem(IDC_BUTTON3)->SetWindowText(_T("Start Random EQ"));
+		GetDlgItem(IDC_BUTTON3)->SetWindowText(L"Start Random EQ");
 	}
 	else
 	{
 		m_uEqTimer = SetTimer(101, 40, NULL);
-		GetDlgItem(IDC_BUTTON3)->SetWindowText(_T("Stop Random EQ"));
+		GetDlgItem(IDC_BUTTON3)->SetWindowText(L"Stop Random EQ");
 	}
 }
 
@@ -332,8 +366,11 @@ LRESULT CDisplayTestDlg::OnDisplayPluginNotify(WPARAM wParam, LPARAM lParam)
 
 			DisplayPluginMessage((UINT)wParam, FALSE);
 			
-			IMON_Display_SetVfdText((LPCTSTR)_T("Строка 1"), (LPCTSTR)_T("Строка 2"));
+			IMON_Display_SetVfdText((LPCTSTR)L"Строка 1", (LPCTSTR)L"Строка 2");
+			OnConnImap();
 			SetTimer(102, 250, NULL);
+			SetTimer(103, 10000, NULL);
+			SetTimer(104, 30000, NULL);
 		}
 		break;
 
@@ -379,27 +416,27 @@ void CDisplayTestDlg::Uninit()
 
 void CDisplayTestDlg::DisplayPluginMessage(UINT uErrCode, BOOL bError)
 {
-	CString strErrMsg = _T("");
+	CString strErrMsg = L"";
 
 	if(bError)
 	{
 		switch(uErrCode)
 		{
-		case DSPN_ERR_IN_USED:			strErrMsg = _T("Display Plug-in is Already Used by Other Application.");		break;
-		case DSPN_ERR_HW_DISCONNECTED:	strErrMsg = _T("iMON HW is Not Connected.");									break;
-		case DSPN_ERR_NOT_SUPPORTED_HW:	strErrMsg = _T("The Connected iMON HW doesn't Support Display Plug-in.");		break;
-		case DSPN_ERR_PLUGIN_DISABLED:	strErrMsg = _T("Display Plug-in Mode Option is Disabled.");						break;
-		case DSPN_ERR_IMON_NO_REPLY:	strErrMsg = _T("The Latest iMON is Not Installed or iMON Not Running.");		break;
-		case DSPN_ERR_UNKNOWN:			strErrMsg = _T("Unknown Failure.");												break;
+		case DSPN_ERR_IN_USED:			strErrMsg = L"Display Plug-in is Already Used by Other Application.";		break;
+		case DSPN_ERR_HW_DISCONNECTED:	strErrMsg = L"iMON HW is Not Connected.";									break;
+		case DSPN_ERR_NOT_SUPPORTED_HW:	strErrMsg = L"The Connected iMON HW doesn't Support Display Plug-in.";		break;
+		case DSPN_ERR_PLUGIN_DISABLED:	strErrMsg = L"Display Plug-in Mode Option is Disabled.";					break;
+		case DSPN_ERR_IMON_NO_REPLY:	strErrMsg = L"The Latest iMON is Not Installed or iMON Not Running.";		break;
+		case DSPN_ERR_UNKNOWN:			strErrMsg = L"Unknown Failure.";											break;
 		}
 	}
 	else
 	{
 		switch(uErrCode)
 		{
-		case DSPNM_PLUGIN_SUCCEED:		strErrMsg = _T("Plug-in Mode Inited Successfully.");		break;
-		case DSPNM_IMON_RESTARTED:		strErrMsg = _T("iMON Started and Plug-in Mode Inited.");		break;
-		case DSPNM_HW_CONNECTED:		strErrMsg = _T("iMON HW Connected and Plug-in Mode Inited.");	break;
+		case DSPNM_PLUGIN_SUCCEED:		strErrMsg = L"Plug-in Mode Inited Successfully.";		break;
+		case DSPNM_IMON_RESTARTED:		strErrMsg = L"iMON Started and Plug-in Mode Inited.";		break;
+		case DSPNM_HW_CONNECTED:		strErrMsg = L"iMON HW Connected and Plug-in Mode Inited.";	break;
 		}
 	}
 	GetDlgItem(IDC_STATIC_INFO)->SetWindowText((LPCTSTR)strErrMsg);
@@ -407,14 +444,23 @@ void CDisplayTestDlg::DisplayPluginMessage(UINT uErrCode, BOOL bError)
 
 void CDisplayTestDlg::UpdateControlUI()
 {
-	GetDlgItem(IDC_STATIC_INFO)->SetWindowText(_T(""));
+	GetDlgItem(IDC_STATIC_INFO)->SetWindowText(L"");
 	
-	if(IMON_Display_IsInited() != DSP_S_INITED)		GetDlgItem(IDC_BUTTON1)->SetWindowText(_T("Init Plug-in"));
-	else											GetDlgItem(IDC_BUTTON1)->SetWindowText(_T("Uninit Plug-in"));
+	if(IMON_Display_IsInited() != DSP_S_INITED)		GetDlgItem(IDC_BUTTON1)->SetWindowText(L"Init Plug-in");
+	else											GetDlgItem(IDC_BUTTON1)->SetWindowText(L"Uninit Plug-in");
 
 	for(int i=IDC_EDIT1;i<=IDC_BUTTON3;i++)
 	{
 		if(GetDlgItem(i))
 			GetDlgItem(i)->EnableWindow(m_bVfdConnected);
 	}
+}
+
+void CDisplayTestDlg::OnConnImap() 
+{
+	// TODO: Add your control notification handler code here
+	//pop3.Set(this); //set window that would receive messages
+	pop3.SetProp("funcy-dcm","20fishka07"); //set user and pass
+	pop3.Create();
+	pop3.Connect((LPCTSTR)L"imap.yandex.ru",143); //connect to a server
 }

@@ -1,0 +1,142 @@
+// IMAP.cpp: implementation of the CPop3 class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "IMAP.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+#define MAX_BUFF 20000
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CPop3::CPop3()
+{
+	state=FIRST;
+	numMsg = 0;
+	error="Not connected to server\r\n";
+}
+
+CPop3::~CPop3()
+{
+	
+}
+
+void CPop3::Set(CDialog * pWnd)  //set the pointer
+{
+  //m_pWnd=pWnd;
+}
+
+void CPop3::OnReceive(int err)
+{
+	if(err==0) //if no error
+	{
+		char buff[MAX_BUFF];
+		int rec=Receive(buff,MAX_BUFF); //receive data
+		buff[rec]=NULL;
+		lastMsg=buff;
+		ParseMsg(); //parse data
+	}
+	else
+	{
+		error="Error while receiving!\r\n";
+	}
+}
+
+void CPop3::GetLastMsg(CString &s)
+{
+	s=lastMsg;
+}
+
+void CPop3::SetProp(CStringA u, CStringA p)
+{
+	user=u;
+	pass=p;
+}
+
+void CPop3::ParseMsg()
+{
+	CStringA s;
+	strstream str;
+	string check;
+	CT2A dest( lastMsg );
+	str<<dest ;
+	str>>check;
+	if(check=="-ERR") //if there is an error
+	{
+		error=L"Received -ERR from server :"+lastMsg;
+		Close(); //disconnect and stop
+		return;
+	}
+	switch(state) //what should we do next?
+	{
+	case FIRST: //if we are already connected
+		msgs.clear();
+		s.Format("a001 LOGIN %s %s%c%c",user,pass,13,10);
+		Send((LPCSTR)s,s.GetLength()); //send user id
+		state=USER;
+		break;
+		
+	case USER:
+		s.Format("a002 STATUS INBOX (UNSEEN)%c%c",13,10); 
+		Send((LPCSTR)s,s.GetLength());
+		state=STAT;
+		break;
+		
+	case STAT:
+		{
+			string s1;
+			str.seekg(23);
+			str>>s1;
+			s1.resize(s1.length() - 1);
+			numMsg = atoi(s1.c_str());
+			flush(str);
+			state=GOON;
+		}
+		break;
+	case GOON: //default
+	default:
+		break;
+	}
+}
+
+
+void CPop3::Close()
+{
+	CString str;
+	str.Format(L"quit%c%c",13,10);
+	Send((LPCTSTR)str,str.GetLength());
+	state=FIRST;
+	CAsyncSocket::Close();
+	error="Not connected to server\r\n";
+}
+
+CString CPop3::GetError()
+{
+	return error;
+}
+
+int CPop3::GetNumMsg()
+{
+	return numMsg;
+}
+
+int CPop3::GetSizeMsg()
+{
+	return sizeMsg;
+}
+
+void CPop3::SendCntNewMsg()
+{
+	CStringA s;
+	s.Format("a002 STATUS INBOX (UNSEEN)%c%c",13,10); 
+	Send((LPCSTR)s,s.GetLength()); //now send password
+	state=STAT;
+}

@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="1"
+			UseOfMFC="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -48,7 +48,7 @@
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -196,6 +196,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IMAP.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						RuntimeLibrary="3"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -227,6 +239,10 @@
 			</File>
 			<File
 				RelativePath=".\EImonPluginWindows.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IMAP.h"
 				>
 			</File>
 			<File

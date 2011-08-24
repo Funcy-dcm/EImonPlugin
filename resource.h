@@ -6,6 +6,7 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_DISPLAYTEST_DIALOG          102
+#define IDP_SOCKETS_INIT_FAILED         103
 #define IDI_ICON1                       133
 #define IDR_MAINFRAME                   133
 #define IDC_BUTTON1                     1000
