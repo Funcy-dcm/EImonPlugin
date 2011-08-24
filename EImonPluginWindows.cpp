@@ -166,7 +166,9 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	EMAIL[1] = L"Alis";
 
 	Init();
-				//SetTimer(103, 10000, NULL);
+	//OnConnImap();
+	//SetTimer(103, 10000, NULL);
+	//SetTimer(104, 30000, NULL);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -292,30 +294,37 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	} else if(nIDEvent == 103) {
 		switch(viewvfd) {
 			case TIME: 
+				viewvfd = EMAIL1;
 				str3 = L"                ";
 				length = (16 - EMAIL[0].GetLength())/2;
 				if ((length>0) && (length<16)) str1 = str3.Left(length);
 				str1.AppendFormat(EMAIL[0]);
-				str4.Format(L"%d", pop3.GetNumMsg());
+				str4.Format(L"%d", pop3->GetNumMsg());
 				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str2 = str3.Left(length);
-				str2.AppendFormat(L"%d", pop3.GetNumMsg());
+				str2.AppendFormat(L"%d", pop3->GetNumMsg());
 				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
-				viewvfd = EMAIL1;
 				break;
 			case EMAIL1:
-				str1.Format(EMAIL[1]);
-				str2.Format(L"%d", 0);
-				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 				viewvfd = EMAIL2;
+				str3 = L"                ";
+				length = (16 - EMAIL[1].GetLength())/2;
+				if ((length>0) && (length<16)) str1 = str3.Left(length);
+				str1.AppendFormat(EMAIL[1]);
+				str4.Format(L"%d", pop3d->GetNumMsg());
+				length = (16 - str4.GetLength())/2;
+				if ((length>0) && (length<16)) str2 = str3.Left(length);
+				str2.AppendFormat(L"%d", pop3d->GetNumMsg());
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 				break;
 			case EMAIL2:
-
 				viewvfd = TIME;
+
 				break;
 		}
 	} else if(nIDEvent == 104) {
-		pop3.SendCntNewMsg();
+		pop3->SendCntNewMsg();
+		pop3d->SendCntNewMsg();
 	}
 	CDialog::OnTimer(nIDEvent);
 }
@@ -458,9 +467,15 @@ void CDisplayTestDlg::UpdateControlUI()
 
 void CDisplayTestDlg::OnConnImap() 
 {
+	pop3 = new CPop3;
+	pop3d = new CPop3;
 	// TODO: Add your control notification handler code here
 	//pop3.Set(this); //set window that would receive messages
-	pop3.SetProp("funcy-dcm","20fishka07"); //set user and pass
-	pop3.Create();
-	pop3.Connect((LPCTSTR)L"imap.yandex.ru",143); //connect to a server
+	pop3->SetProp("funcy-dcm","20fishka07"); //set user and pass
+	pop3->Create();
+	pop3->Connect((LPCTSTR)L"imap.yandex.ru",143); //connect to a server
+
+	pop3d->SetProp("alis-dcm","melnica"); //set user and pass
+	pop3d->Create();
+	pop3d->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
 }

@@ -15,7 +15,8 @@ class CDisplayTestDlg : public CDialog
 {
 // Construction
 public:
-	CPop3 pop3;
+	CPop3 *pop3;
+	CPop3 *pop3d;
 	CString EMAIL[2];
 	CDisplayTestDlg(CWnd* pParent = NULL);	// standard constructor
 
