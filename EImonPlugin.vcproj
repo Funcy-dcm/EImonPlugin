@@ -196,6 +196,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EMPClient.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\IMAP.cpp"
 				>
 				<FileConfiguration
@@ -239,6 +243,10 @@
 			</File>
 			<File
 				RelativePath=".\EImonPluginWindows.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EMPClient.h"
 				>
 			</File>
 			<File

@@ -88,6 +88,8 @@ CDisplayTestDlg::CDisplayTestDlg(CWnd* pParent /*=NULL*/)
 	m_uEqTimer2 = 0;
 	m_bVfdConnected = FALSE;
 	viewvfd = TIME;
+	empClient = new CEMPClient;
+	empClient->m_bEMPConnected = FALSE;
 }
 
 void CDisplayTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -166,9 +168,12 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	EMAIL[1] = L"Люда";
 
 	Init();
+	empClient->Create();
+
 	//OnConnImap();
 	//SetTimer(103, 10000, NULL);
 	//SetTimer(104, 30000, NULL);
+	SetTimer(105, 250, NULL);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -327,6 +332,12 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	} else if(nIDEvent == 104) {
 		pop3->SendCntNewMsg();
 		pop3d->SendCntNewMsg();
+	} else if (nIDEvent == 105) {
+		if (!empClient->m_bEMPConnected) {
+			OnConnEMP();
+		} else {
+		
+		}
 	}
 	CDialog::OnTimer(nIDEvent);
 }
@@ -471,8 +482,7 @@ void CDisplayTestDlg::OnConnImap()
 {
 	pop3 = new CPop3;
 	pop3d = new CPop3;
-	// TODO: Add your control notification handler code here
-	//pop3.Set(this); //set window that would receive messages
+
 	pop3->SetProp("funcy-dcm","20fishka07"); //set user and pass
 	pop3->Create();
 	pop3->Connect((LPCTSTR)L"imap.yandex.ru",143); //connect to a server
@@ -480,4 +490,9 @@ void CDisplayTestDlg::OnConnImap()
 	pop3d->SetProp("alis-dcm","melnica"); //set user and pass
 	pop3d->Create();
 	pop3d->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
+}
+
+void CDisplayTestDlg::OnConnEMP() 
+{
+	empClient->Connect((LPCTSTR)L"127.0.0.1",13551); //connect to a server
 }

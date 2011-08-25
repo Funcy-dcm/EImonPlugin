@@ -2,6 +2,7 @@
 //
 #include <ShellAPI.h>
 #include "IMAP.h"
+#include "EMPClient.h"
 #include "resource.h"
 
 #pragma once
@@ -17,6 +18,7 @@ class CDisplayTestDlg : public CDialog
 public:
 	CPop3 *pop3;
 	CPop3 *pop3d;
+	CEMPClient *empClient;
 	CString EMAIL[2];
 	CDisplayTestDlg(CWnd* pParent = NULL);	// standard constructor
 
@@ -59,6 +61,7 @@ protected:
 	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnConnImap();
+	afx_msg void OnConnEMP();
 private:
 	VIEWVFD viewvfd;
 

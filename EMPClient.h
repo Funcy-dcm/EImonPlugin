@@ -2,8 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 
-#if !defined(AFX_IMAP_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)
-#define AFX_IMAP_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_
+#if !defined(AFX_EMPClient_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)
+#define AFX_EMPClient_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_
 
 #include <strstream>
 #include <string>
@@ -14,10 +14,7 @@ using namespace std;
 #pragma once
 #endif // _MSC_VER > 1000
 
-//enum type describing actual pop3 state
-typedef enum {FIRST=0,USER,STAT,GOON} STATE;
-
-class CPop3  : public CAsyncSocket
+class CEMPClient  : public CAsyncSocket
 {
 
 public:
@@ -32,16 +29,21 @@ public:
 	void GetLastMsg(CString &);
 	//receiving event
 	void OnReceive(int err);
-	CPop3();
-	virtual ~CPop3();
+	CEMPClient();
+	virtual ~CEMPClient();
+	BOOL m_bEMPConnected;
 
 private:
+	//enum type describing actual EMPClient state
+	typedef enum {FIRST1=0,USER1,STAT1,GOON1} STATE1;
+
 	//main function
 	void ParseMsg();
-	CString lastMsg;
-	STATE state;
+	CStringA lastMsg;
+	CStringA lastMsg_t;
+	STATE1 state;
 	CStringA user, pass;
 	int numMsg, sizeMsg;
 };
 
-#endif // !defined(AFX_IMAP_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)
+#endif // !defined(AFX_EMPClient_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)
