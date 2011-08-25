@@ -162,8 +162,8 @@ BOOL CDisplayTestDlg::OnInitDialog()
 
 	UpdateData(FALSE);
 	
-	EMAIL[0] = L"Funcy";
-	EMAIL[1] = L"Alis";
+	EMAIL[0] = L"Егор";
+	EMAIL[1] = L"Люда";
 
 	Init();
 	//OnConnImap();
@@ -296,17 +296,19 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			case TIME: 
 				viewvfd = EMAIL1;
 				str3 = L"                ";
-				length = (16 - EMAIL[0].GetLength())/2;
+				str4.Format(L"%s/%s", EMAIL[1], EMAIL[0]); 
+				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str1 = str3.Left(length);
-				str1.AppendFormat(EMAIL[0]);
-				str4.Format(L"%d", pop3->GetNumMsg());
+				str1.AppendFormat(str4);
+				str4.Format(L"%d/%d", pop3d->GetNumMsg(), pop3->GetNumMsg());
 				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str2 = str3.Left(length);
-				str2.AppendFormat(L"%d", pop3->GetNumMsg());
+				str2.AppendFormat(str4);
 				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 				break;
 			case EMAIL1:
-				viewvfd = EMAIL2;
+				viewvfd = TIME;
+				/*viewvfd = EMAIL2;
 				str3 = L"                ";
 				length = (16 - EMAIL[1].GetLength())/2;
 				if ((length>0) && (length<16)) str1 = str3.Left(length);
@@ -315,7 +317,7 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str2 = str3.Left(length);
 				str2.AppendFormat(L"%d", pop3d->GetNumMsg());
-				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);*/
 				break;
 			case EMAIL2:
 				viewvfd = TIME;
