@@ -22,7 +22,7 @@ public:
 	int GetSizeMsg();
 	//gets number of msgs that are on server
 	int GetNumMsg();
-	void SendCntNewMsg();
+	void SendInfo();
 	//sets username and password
 	void SetProp(CStringA u, CStringA p);
 	//gets last message recievied from server
@@ -32,6 +32,9 @@ public:
 	CEMPClient();
 	virtual ~CEMPClient();
 	BOOL m_bEMPConnected;
+	CString lastMsg_t;
+	unsigned __int64 currentTime;
+	unsigned __int64 totalTime;
 
 private:
 	//enum type describing actual EMPClient state
@@ -40,10 +43,12 @@ private:
 	//main function
 	void ParseMsg();
 	CStringA lastMsg;
-	CStringA lastMsg_t;
+	
 	STATE1 state;
 	CStringA user, pass;
 	int numMsg, sizeMsg;
+protected:
+	virtual void OnClose(int);
 };
 
 #endif // !defined(AFX_EMPClient_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)

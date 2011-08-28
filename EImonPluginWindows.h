@@ -9,7 +9,7 @@
 
 #define WM_DSP_PLUGIN_NOTIFY	WM_APP + 1001
 
-typedef enum {TIME=0,EMAIL1,EMAIL2} VIEWVFD;
+typedef enum {TIME=0,MAIL,EMPINFO} VIEWVFD;
 
 // CDisplayTestDlg dialog
 class CDisplayTestDlg : public CDialog
@@ -19,17 +19,20 @@ public:
 	CPop3 *pop3;
 	CPop3 *pop3d;
 	CEMPClient *empClient;
-	CString EMAIL[2];
+	CString Email[2];
 	CDisplayTestDlg(CWnd* pParent = NULL);	// standard constructor
 
 // Dialog Data
 	enum { IDD = IDD_DISPLAYTEST_DIALOG };
 	CString m_strLine1;
 	CString m_strLine2;
+	void OnConnImap();
+	void OnConnEMP();
+	VIEWVFD viewvfd;
+	BOOL m_bVfdConnected;
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
 
 // Implementation
 protected:
@@ -37,7 +40,6 @@ protected:
 
 	UINT_PTR m_uEqTimer;
 	UINT_PTR m_uEqTimer2;
-	BOOL m_bVfdConnected;
 
 	void Init();
 	void Uninit();
@@ -60,9 +62,6 @@ protected:
 	afx_msg LRESULT OnDisplayPluginNotify(WPARAM, LPARAM);
 	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
-	afx_msg void OnConnImap();
-	afx_msg void OnConnEMP();
 private:
-	VIEWVFD viewvfd;
 
 };

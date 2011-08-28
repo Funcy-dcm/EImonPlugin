@@ -14,6 +14,10 @@ static char THIS_FILE[] = __FILE__;
 
 #define MYWM_NOTIFYICON (WM_APP + 1)
 
+CDisplayTestDlg *dlg = 0;
+void CALLBACK OnTimer1(HWND, UINT, UINT, DWORD);
+void CALLBACK OnTimer2(HWND, UINT, UINT, DWORD);
+
 BOOL TrayMessage (HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, PSTR pszTip) 
 // systray icon 
 { 
@@ -63,6 +67,7 @@ protected:
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
+	
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
@@ -90,6 +95,11 @@ CDisplayTestDlg::CDisplayTestDlg(CWnd* pParent /*=NULL*/)
 	viewvfd = TIME;
 	empClient = new CEMPClient;
 	empClient->m_bEMPConnected = FALSE;
+	pop3 = new CPop3;
+	pop3d = new CPop3;
+	pop3->m_bIMAPConnected = FALSE;
+	pop3d->m_bIMAPConnected = FALSE;
+	dlg = this;
 }
 
 void CDisplayTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -164,16 +174,28 @@ BOOL CDisplayTestDlg::OnInitDialog()
 
 	UpdateData(FALSE);
 	
-	EMAIL[0] = L"Егор";
-	EMAIL[1] = L"Люда";
+	Email[0] = L"Funcy";
+	Email[1] = L"Alis";
 
-	Init();
 	empClient->Create();
 
-	//OnConnImap();
-	//SetTimer(103, 10000, NULL);
-	//SetTimer(104, 30000, NULL);
-	SetTimer(105, 250, NULL);
+	pop3->SetProp("funcy-dcm","20fishka07"); //set user and pass
+	pop3->Create();
+	pop3d->SetProp("alis-dcm","melnica"); //set user and pass
+	pop3d->Create();
+
+	SetTimer(102, 250, NULL);
+	SetTimer(103, 10000, NULL);
+	SetTimer(104, 60000, NULL);
+	SetTimer(105, 1000, NULL);
+	SetTimer(106, 4000, NULL);
+	SetTimer(107, 180000, NULL);
+/*	SetTimer(104, 60000, OnTimer2);
+	SetTimer(105, 1000, OnTimer2);
+	SetTimer(106, 4000, OnTimer2);
+	SetTimer(107, 180000, OnTimer2);
+*/
+	Init();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -262,7 +284,6 @@ HCURSOR CDisplayTestDlg::OnQueryDragIcon()
 void CDisplayTestDlg::OnDestroy() 
 {
 	CDialog::OnDestroy();
-
 	IMON_Display_Uninit();
 }
 
@@ -273,6 +294,8 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	CString str3;
 	CString str4;
 	int length;
+	static BOOL EMPConnectedT = FALSE;
+
 	if(nIDEvent == 101)
 	{
 		DSPEQDATA eqData;
@@ -281,7 +304,8 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			eqData.BandData[i] = rand()%100;
 		}
 		IMON_Display_SetVfdEqData(&eqData);
-	} else if((nIDEvent == 102) && (viewvfd == TIME)) {
+	} 
+	if(nIDEvent == 102) {
 		SYSTEMTIME sm;
 		GetLocalTime(&sm);
 		switch(sm.wDayOfWeek) {
@@ -295,13 +319,42 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 		}
 		str1.Format(L" %02d.%02d.%04d %s", sm.wDay, sm.wMonth, sm.wYear, str3);
 		str2.Format(L"    %02d:%02d:%02d", sm.wHour, sm.wMinute, sm.wSecond);
-		IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
-	} else if(nIDEvent == 103) {
+		GetDlgItem(IDC_STATIC_INFO2)->SetWindowText((LPCTSTR)str2);
+		if (m_bVfdConnected && (viewvfd == TIME))
+			IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+
+		if (EMPConnectedT) {
+			WORD sec = (WORD)(empClient->currentTime/1000);
+			WORD min = sec/60;
+			WORD hour = min/60;
+			WORD secT = (WORD)(empClient->totalTime/1000);
+			WORD minT = secT/60;
+			WORD hourT = minT/60;
+			str1 = empClient->lastMsg_t;
+			str2.Format(L"%1d:%02d:%02d/%1d:%02d:%02d", hour%60, min%60, sec%60, hourT%60, minT%60, secT%60);
+			if (m_bVfdConnected)
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+			empClient->SendInfo();
+		}
+		if (EMPConnectedT != empClient->m_bEMPConnected) {
+			EMPConnectedT = empClient->m_bEMPConnected;
+			if (EMPConnectedT) {
+				KillTimer(103);
+				viewvfd = EMPINFO;
+				empClient->SendInfo();
+			} else {
+				viewvfd = TIME;
+				SetTimer(103, 10000, NULL);
+			}	
+		}
+	} 
+	if(nIDEvent == 103) {
+		KillTimer(nIDEvent);
 		switch(viewvfd) {
-			case TIME: 
-				viewvfd = EMAIL1;
+			case TIME:
+				viewvfd = MAIL;
 				str3 = L"                ";
-				str4.Format(L"%s/%s", EMAIL[1], EMAIL[0]); 
+				str4.Format(L"%s/%s", Email[1], Email[0]); 
 				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str1 = str3.Left(length);
 				str1.AppendFormat(str4);
@@ -309,39 +362,57 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 				length = (16 - str4.GetLength())/2;
 				if ((length>0) && (length<16)) str2 = str3.Left(length);
 				str2.AppendFormat(str4);
-				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+				if (m_bVfdConnected)
+					IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+				SetTimer(103, 3000, NULL);
 				break;
-			case EMAIL1:
+			case MAIL: 
 				viewvfd = TIME;
-				/*viewvfd = EMAIL2;
-				str3 = L"                ";
-				length = (16 - EMAIL[1].GetLength())/2;
-				if ((length>0) && (length<16)) str1 = str3.Left(length);
-				str1.AppendFormat(EMAIL[1]);
-				str4.Format(L"%d", pop3d->GetNumMsg());
-				length = (16 - str4.GetLength())/2;
-				if ((length>0) && (length<16)) str2 = str3.Left(length);
-				str2.AppendFormat(L"%d", pop3d->GetNumMsg());
-				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);*/
+				SetTimer(103, 10000, NULL);
 				break;
-			case EMAIL2:
-				viewvfd = TIME;
-
-				break;
-		}
-	} else if(nIDEvent == 104) {
-		pop3->SendCntNewMsg();
-		pop3d->SendCntNewMsg();
-	} else if (nIDEvent == 105) {
-		if (!empClient->m_bEMPConnected) {
-			OnConnEMP();
-		} else {
-		
 		}
 	}
+	if(nIDEvent == 104) {
+		pop3->SendCntNewMsg();
+		pop3d->SendCntNewMsg();
+	}
+	if (nIDEvent == 105/* && m_bVfdConnected*/) {
+		OnConnEMP();
+	}
+	if (nIDEvent == 106/* && m_bVfdConnected*/) {
+		KillTimer(nIDEvent);
+		OnConnImap();
+	}
+	if (nIDEvent == 107/* && m_bVfdConnected*/) {
+		OnConnImap();
+	}
+ 
 	CDialog::OnTimer(nIDEvent);
 }
 
+void CALLBACK OnTimer1(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime)
+{
+	CString str1;
+	str1 = "1";
+}
+
+ void CALLBACK OnTimer2(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime)
+ {
+	if(nIDEvent == 104) {
+		dlg->pop3->SendCntNewMsg();
+		dlg->pop3d->SendCntNewMsg();
+	}
+	if (nIDEvent == 105/* && m_bVfdConnected*/) {
+		dlg->OnConnEMP();
+	}
+	if (nIDEvent == 106/* && m_bVfdConnected*/) {
+		KillTimer(hWnd, nIDEvent);
+		dlg->OnConnImap();
+	}
+	if (nIDEvent == 107/* && m_bVfdConnected*/) {
+		dlg->OnConnImap();
+	}
+ }
 
 void CDisplayTestDlg::OnBnClickedButtonInit()
 {
@@ -389,10 +460,6 @@ LRESULT CDisplayTestDlg::OnDisplayPluginNotify(WPARAM wParam, LPARAM lParam)
 			DisplayPluginMessage((UINT)wParam, FALSE);
 			
 			IMON_Display_SetVfdText((LPCTSTR)L"Строка 1", (LPCTSTR)L"Строка 2");
-			OnConnImap();
-			SetTimer(102, 250, NULL);
-			SetTimer(103, 10000, NULL);
-			SetTimer(104, 30000, NULL);
 		}
 		break;
 
@@ -480,19 +547,14 @@ void CDisplayTestDlg::UpdateControlUI()
 
 void CDisplayTestDlg::OnConnImap() 
 {
-	pop3 = new CPop3;
-	pop3d = new CPop3;
-
-	pop3->SetProp("funcy-dcm","20fishka07"); //set user and pass
-	pop3->Create();
-	pop3->Connect((LPCTSTR)L"imap.yandex.ru",143); //connect to a server
-
-	pop3d->SetProp("alis-dcm","melnica"); //set user and pass
-	pop3d->Create();
-	pop3d->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
+	if (!pop3->m_bIMAPConnected)
+		pop3->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
+	if (!pop3d->m_bIMAPConnected)
+		pop3d->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
 }
 
 void CDisplayTestDlg::OnConnEMP() 
 {
-	empClient->Connect((LPCTSTR)L"127.0.0.1",13551); //connect to a server
+	if (!empClient->m_bEMPConnected)
+		empClient->Connect((LPCTSTR)L"127.0.0.1",13551); //connect to a server
 }

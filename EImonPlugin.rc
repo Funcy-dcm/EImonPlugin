@@ -100,6 +100,7 @@ BEGIN
     PUSHBUTTON      "Send Text",IDC_BUTTON2,33,74,62,16
     PUSHBUTTON      "Start Random EQ",IDC_BUTTON3,100,74,62,16
     LTEXT           "Static",IDC_STATIC_INFO,71,11,225,10
+    LTEXT           "Static",IDC_STATIC_INFO2,71,22,60,10
 END
 
 

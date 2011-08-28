@@ -88,6 +88,44 @@ void CPop3::ParseMsg()
 	}
 }
 
+void CPop3::OnConnect(int err)
+{
+	if(err==0) {
+		m_bIMAPConnected = TRUE;
+		state=FIRST;
+	} else {
+		Close();
+	}
+}
+
+void CPop3::OnClose(int err)
+{
+	if(err==0){
+
+	} else {
+		Close();
+	}
+	m_bIMAPConnected = FALSE;
+	state=FIRST;
+}
+
+
+void CPop3::OnAccept(int err)		  
+{															  
+	if(err==0) {
+	
+	} else {
+	
+	}
+}
+
+void CPop3::OnSend(int err)
+{
+	if(err==0) {
+	
+	}
+}
+
 int CPop3::GetNumMsg()
 {
 	return numMsg;
@@ -100,8 +138,10 @@ int CPop3::GetSizeMsg()
 
 void CPop3::SendCntNewMsg()
 {
-	CStringA s;
-	s.Format("a002 STATUS INBOX (UNSEEN)%c%c",13,10); 
-	Send((LPCSTR)s,s.GetLength()); //now send password
-	state=STAT;
+	if (m_bIMAPConnected) {
+		CStringA s;
+		s.Format("a002 STATUS INBOX (UNSEEN)%c%c",13,10); 
+		Send((LPCSTR)s,s.GetLength()); //now send password
+		state=STAT;
+	}
 }

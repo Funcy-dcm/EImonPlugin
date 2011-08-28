@@ -34,6 +34,7 @@ public:
 	void OnReceive(int err);
 	CPop3();
 	virtual ~CPop3();
+	BOOL m_bIMAPConnected;
 
 private:
 	//main function
@@ -42,6 +43,11 @@ private:
 	STATE state;
 	CStringA user, pass;
 	int numMsg, sizeMsg;
+protected:
+	virtual void OnConnect(int);
+	virtual void OnAccept(int);
+	virtual void OnClose(int);
+	virtual void OnSend(int);
 };
 
 #endif // !defined(AFX_IMAP_H__1957A2DC_027A_43AF_82B6_789B397147F3__INCLUDED_)
