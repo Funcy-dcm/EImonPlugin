@@ -18,7 +18,7 @@ CDisplayTestDlg *dlg = 0;
 void CALLBACK OnTimer1(HWND, UINT, UINT, DWORD);
 void CALLBACK OnTimer2(HWND, UINT, UINT, DWORD);
 
-BOOL TrayMessage (HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, PSTR pszTip) 
+BOOL TrayMessage (HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, LPCWSTR pszTip) 
 // systray icon 
 { 
     BOOL res; 
@@ -35,7 +35,7 @@ BOOL TrayMessage (HWND hDlg, DWORD dwMessage, UINT uID, HICON hIcon, PSTR pszTip
 
     if (pszTip) 
     { 
-        lstrcpyn(tnd.szTip, (LPCTSTR)pszTip, sizeof(tnd.szTip)); 
+        lstrcpyn(tnd.szTip, pszTip, sizeof(tnd.szTip)); 
     } 
     else 
     { 
@@ -100,6 +100,8 @@ CDisplayTestDlg::CDisplayTestDlg(CWnd* pParent /*=NULL*/)
 	pop3->m_bIMAPConnected = FALSE;
 	pop3d->m_bIMAPConnected = FALSE;
 	dlg = this;
+
+	m_bVisible = FALSE;
 }
 
 void CDisplayTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -116,6 +118,7 @@ BEGIN_MESSAGE_MAP(CDisplayTestDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
+	ON_WM_WINDOWPOSCHANGING()
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButtonInit)
 	ON_BN_CLICKED(IDC_BUTTON2, OnBnClickedButtonVfdSendText)
@@ -130,11 +133,6 @@ END_MESSAGE_MAP()
 BOOL CDisplayTestDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
- 
-	/*HICON hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	HWND hWnd = this->GetSafeHwnd();
-	BOOL ok = TrayMessage(hWnd, NIM_ADD, 0, hIcon, 0);
-	if (ok) ShowWindow(SW_HIDE);*/
 
 	// Add "About..." menu item to system menu.
 
@@ -187,39 +185,32 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	SetTimer(106, 4000, NULL);
 	SetTimer(107, 180000, NULL);
 	SetTimer(108, 500, NULL);
-/*	SetTimer(104, 60000, OnTimer2);
-	SetTimer(105, 1000, OnTimer2);
-	SetTimer(106, 4000, OnTimer2);
-	SetTimer(107, 180000, OnTimer2);
-*/
 	Init();
+
+	TrayMessage(this->GetSafeHwnd(), NIM_ADD, 0, AfxGetApp()->LoadIcon(IDR_MAINFRAME), L"EImonPlugin");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+void CDisplayTestDlg::OnWindowPosChanging(WINDOWPOS FAR* pos)
+{
+	if(!m_bVisible)
+        pos->flags &= ~SWP_SHOWWINDOW;
+
+    CDialog::OnWindowPosChanging(pos);
+}
+
 void CDisplayTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	HWND hWnd;		// указатель на окно 
-	HICON hIcon;	// указатель на иконку 
-//	char *szText;	// указатель на текст для подсказки 
-	BOOL ok;
-
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
 	} 
 	switch (nID & 0xFFF0) {
     case SC_MINIMIZE:
-		hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-		hWnd = this->GetSafeHwnd();
-		ok = TrayMessage(hWnd, NIM_ADD, 0, hIcon, 0);
-		if (ok) ShowWindow(SW_HIDE);
+		m_bVisible = false;
+		ShowWindow(SW_HIDE);
         break;
-	case MYWM_NOTIFYICON:
-		hWnd = this->GetSafeHwnd();
-		TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
-		ShowWindow(SW_SHOW);
-		break;
     default:
         CDialog::OnSysCommand(nID, lParam);
     }
@@ -227,13 +218,11 @@ void CDisplayTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	HWND hWnd;
 	switch(msg) {
 	case MYWM_NOTIFYICON:
 		switch(lParam) {
 		case WM_LBUTTONDBLCLK:
-			hWnd = this->GetSafeHwnd();
-			TrayMessage(hWnd, NIM_DELETE, 0, 0, 0);
+			m_bVisible = true;
 			ShowWindow(SW_SHOW);
 			break;
 		}

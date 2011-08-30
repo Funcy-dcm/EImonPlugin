@@ -47,6 +47,7 @@ protected:
 	void UpdateControlUI();
 
 	// Generated message map functions
+	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* pos);
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
@@ -63,5 +64,6 @@ protected:
 	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
+	bool m_bVisible;
 
 };
