@@ -177,12 +177,8 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	Email[0] = L"Funcy";
 	Email[1] = L"Alis";
 
-	empClient->Create();
-
 	pop3->SetProp("funcy-dcm","20fishka07"); //set user and pass
-	pop3->Create();
 	pop3d->SetProp("alis-dcm","melnica"); //set user and pass
-	pop3d->Create();
 
 	SetTimer(102, 250, NULL);
 	SetTimer(103, 10000, NULL);
@@ -190,6 +186,7 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	SetTimer(105, 1000, NULL);
 	SetTimer(106, 4000, NULL);
 	SetTimer(107, 180000, NULL);
+	SetTimer(108, 500, NULL);
 /*	SetTimer(104, 60000, OnTimer2);
 	SetTimer(105, 1000, OnTimer2);
 	SetTimer(106, 4000, OnTimer2);
@@ -295,6 +292,7 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	CString str4;
 	int length;
 	static BOOL EMPConnectedT = FALSE;
+	static int curStr;
 
 	if(nIDEvent == 101)
 	{
@@ -322,31 +320,6 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 		GetDlgItem(IDC_STATIC_INFO2)->SetWindowText((LPCTSTR)str2);
 		if (m_bVfdConnected && (viewvfd == TIME))
 			IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
-
-		if (EMPConnectedT) {
-			WORD sec = (WORD)(empClient->currentTime/1000);
-			WORD min = sec/60;
-			WORD hour = min/60;
-			WORD secT = (WORD)(empClient->totalTime/1000);
-			WORD minT = secT/60;
-			WORD hourT = minT/60;
-			str1 = empClient->lastMsg_t;
-			str2.Format(L"%1d:%02d:%02d/%1d:%02d:%02d", hour%60, min%60, sec%60, hourT%60, minT%60, secT%60);
-			if (m_bVfdConnected)
-				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
-			empClient->SendInfo();
-		}
-		if (EMPConnectedT != empClient->m_bEMPConnected) {
-			EMPConnectedT = empClient->m_bEMPConnected;
-			if (EMPConnectedT) {
-				KillTimer(103);
-				viewvfd = EMPINFO;
-				empClient->SendInfo();
-			} else {
-				viewvfd = TIME;
-				SetTimer(103, 10000, NULL);
-			}	
-		}
 	} 
 	if(nIDEvent == 103) {
 		KillTimer(nIDEvent);
@@ -385,6 +358,41 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	}
 	if (nIDEvent == 107/* && m_bVfdConnected*/) {
 		OnConnImap();
+	}
+	if (nIDEvent == 108) {
+		if (EMPConnectedT) {
+			WORD sec = (WORD)(empClient->currentTime/1000);
+			WORD min = sec/60;
+			WORD hour = min/60;
+			WORD secT = (WORD)(empClient->totalTime/1000);
+			WORD minT = secT/60;
+			WORD hourT = minT/60;
+			str2.Format(L"%1d:%02d:%02d/%1d:%02d:%02d", hour%60, min%60, sec%60, hourT%60, minT%60, secT%60);
+			
+			str3 = empClient->lastMsg_t;
+			length = str3.GetLength();
+			if (length > 16){
+				str1 = str3.Right(length - curStr);
+				if (curStr < length) curStr++;
+				else curStr = 0;
+			} else str1 = str3;
+
+			if (m_bVfdConnected)
+				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
+			empClient->SendInfo();
+		}
+		if (EMPConnectedT != empClient->m_bEMPConnected) {
+			EMPConnectedT = empClient->m_bEMPConnected;
+			curStr = 0;
+			if (EMPConnectedT) {
+				KillTimer(103);
+				viewvfd = EMPINFO;
+				empClient->SendInfo();
+			} else {
+				viewvfd = TIME;
+				SetTimer(103, 10000, NULL);
+			}	
+		}
 	}
  
 	CDialog::OnTimer(nIDEvent);
@@ -547,14 +555,39 @@ void CDisplayTestDlg::UpdateControlUI()
 
 void CDisplayTestDlg::OnConnImap() 
 {
-	if (!pop3->m_bIMAPConnected)
+	if (!pop3->m_bIMAPConnected) {
+		if (pop3->IMAPConnected != pop3->m_bIMAPConnected) {
+			pop3->IMAPConnected = pop3->m_bIMAPConnected;
+			if (!pop3->IMAPConnected) {
+				pop3->Create();
+			}
+		}
 		pop3->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
-	if (!pop3d->m_bIMAPConnected)
+	}
+
+	if (!pop3d->m_bIMAPConnected) {
+		if (pop3d->IMAPConnected != pop3d->m_bIMAPConnected) {
+			pop3d->IMAPConnected = pop3d->m_bIMAPConnected;
+			if (!pop3d->IMAPConnected) {
+				pop3d->Create();
+			}
+		}
 		pop3d->Connect((LPCTSTR)L"imap.yandex.com",143); //connect to a server
+	}
 }
 
 void CDisplayTestDlg::OnConnEMP() 
 {
-	if (!empClient->m_bEMPConnected)
+	static BOOL EMPConnectedT = TRUE;  
+	if (!empClient->m_bEMPConnected) {
+		if (EMPConnectedT != empClient->m_bEMPConnected) {
+			EMPConnectedT = empClient->m_bEMPConnected;
+			if (!EMPConnectedT) {
+				empClient->Create();
+			}
+		}
 		empClient->Connect((LPCTSTR)L"127.0.0.1",13551); //connect to a server
+	} else {
+		EMPConnectedT = TRUE;
+	}
 }

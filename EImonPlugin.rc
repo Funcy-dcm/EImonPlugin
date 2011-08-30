@@ -110,8 +110,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,5
- PRODUCTVERSION 1,0,0,5
+ FILEVERSION 1,0,0,6
+ PRODUCTVERSION 1,0,0,6
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -128,12 +128,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Egor"
             VALUE "FileDescription", "IMON Display Plugin"
-            VALUE "FileVersion", "1.0.0.5"
+            VALUE "FileVersion", "1.0.0.6"
             VALUE "InternalName", "EImonPlugin.exe"
             VALUE "LegalCopyright", "Copyright (C) 2011"
             VALUE "OriginalFilename", "EImonPlugin.exe"
             VALUE "ProductName", "EImonPlugin"
-            VALUE "ProductVersion", "1.0.0.5"
+            VALUE "ProductVersion", "1.0.0.6"
         END
     END
     BLOCK "VarFileInfo"

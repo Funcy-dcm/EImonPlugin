@@ -21,6 +21,7 @@ CPop3::CPop3()
 {
 	state=FIRST;
 	numMsg = 0;
+	IMAPConnected = TRUE;
 }
 
 CPop3::~CPop3()
@@ -92,19 +93,14 @@ void CPop3::OnConnect(int err)
 {
 	if(err==0) {
 		m_bIMAPConnected = TRUE;
+		IMAPConnected = TRUE;
 		state=FIRST;
-	} else {
-		Close();
 	}
 }
 
 void CPop3::OnClose(int err)
 {
-	if(err==0){
-
-	} else {
-		Close();
-	}
+	CAsyncSocket::Close();
 	m_bIMAPConnected = FALSE;
 	state=FIRST;
 }

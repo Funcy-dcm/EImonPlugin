@@ -48,6 +48,7 @@ private:
 	CStringA user, pass;
 	int numMsg, sizeMsg;
 protected:
+	virtual void OnConnect(int);
 	virtual void OnClose(int);
 };
 

@@ -20,8 +20,7 @@ static char THIS_FILE[]=__FILE__;
 
 CEMPClient::CEMPClient()
 {
-	state=FIRST1;
-	numMsg = 0;
+
 }
 
 CEMPClient::~CEMPClient()
@@ -29,18 +28,30 @@ CEMPClient::~CEMPClient()
 	
 }
 
+void CEMPClient::OnConnect(int err)
+{
+	if(err==0) {
+
+	} else {
+		//CAsyncSocket::Close();
+	}
+}
+
 void CEMPClient::OnReceive(int err)
 {
 	if(err==0) {
 		char buff[MAX_BUFF];
 		int rec=Receive(buff,MAX_BUFF); //receive data
-		buff[rec]=NULL;
-		buff[rec+1]=NULL;
+		WORD l0;
+		memcpy(&l0, buff, 2);
+		rec = htons(l0);
+		buff[2+rec]=NULL;
+		buff[2+rec+1]=NULL;
 		int l1, l2;
 		memcpy(&l1, (int*)&buff[2], 4);
 		l1 = htonl(l1);
 		lastMsg = &buff[6];
-		if ((l1+6) < rec) {
+		if ((l1+6) < (rec+2)) {
 			memcpy(&l2, (int*)&buff[6+l1], 4);
 			l2 = htonl(l2);
 			char t;
@@ -73,8 +84,8 @@ void CEMPClient::OnReceive(int err)
 
 void CEMPClient::OnClose(int err)
 {
+	CAsyncSocket::Close();
 	m_bEMPConnected = FALSE;
-	state=FIRST1;
 }
 
 void CEMPClient::SendInfo()

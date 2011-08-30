@@ -35,6 +35,7 @@ public:
 	CPop3();
 	virtual ~CPop3();
 	BOOL m_bIMAPConnected;
+	BOOL IMAPConnected;
 
 private:
 	//main function
