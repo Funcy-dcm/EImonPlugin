@@ -163,13 +163,6 @@ BOOL CDisplayTestDlg::OnInitDialog()
 
 	UpdateControlUI();
 
-	CSliderCtrl* pSliderCtrl = (CSliderCtrl*)GetDlgItem(IDC_SLIDER1);
-	if(pSliderCtrl)
-	{
-		pSliderCtrl->SetRange(0, 100);
-		pSliderCtrl->SetPos(0);
-	}
-
 	UpdateData(FALSE);
 	
 	Email[0] = L"Funcy";
@@ -211,6 +204,8 @@ void CDisplayTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		m_bVisible = false;
 		ShowWindow(SW_HIDE);
         break;
+	case SC_CLOSE:
+		TrayMessage(this->GetSafeHwnd(), NIM_DELETE, 0, 0, 0);
     default:
         CDialog::OnSysCommand(nID, lParam);
     }
@@ -488,15 +483,6 @@ void CDisplayTestDlg::Uninit()
 	IMON_Display_Uninit();
 
 	m_bVfdConnected = FALSE;
-
-	for(int i=IDC_ORANGE1;i<=IDC_AR_SCR2;i++)
-	{
-		if(GetDlgItem(i))
-			((CButton*)GetDlgItem(i))->SetCheck(FALSE);
-	}
-	CSliderCtrl* pSliderCtrl = (CSliderCtrl*)GetDlgItem(IDC_SLIDER1);
-	if(pSliderCtrl)	pSliderCtrl->SetPos(0);
-
 	UpdateControlUI();
 }
 
