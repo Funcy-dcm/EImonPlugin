@@ -5,6 +5,7 @@
 #include "EImonPlugin.h"
 #include "EImonPluginWindows.h"
 #include "IMAP.h"
+#include <psapi.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,8 +85,9 @@ END_MESSAGE_MAP()
 CDisplayTestDlg::CDisplayTestDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CDisplayTestDlg::IDD, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	
+	m_hIconB = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIconS = AfxGetApp()->LoadIcon(IDR_MAINFRAME1);
+
 	m_strLine1 = L"";
 	m_strLine2 = L"";
 
@@ -157,8 +159,8 @@ BOOL CDisplayTestDlg::OnInitDialog()
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	SetIcon(m_hIconB, TRUE);		// Set big icon
+	SetIcon(m_hIconS, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
 	m_strLine1 = L"Привет котёнок!";
@@ -181,9 +183,10 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	SetTimer(106, 4000, NULL);
 	SetTimer(107, 180000, NULL);
 	SetTimer(108, 500, NULL);
+	SetTimer(109, 10000, NULL);
 	Init();
 
-	TrayMessage(this->GetSafeHwnd(), NIM_ADD, 0, AfxGetApp()->LoadIcon(IDR_MAINFRAME), L"EImonPlugin");
+	TrayMessage(this->GetSafeHwnd(), NIM_ADD, 0, m_hIconS, L"EImonPlugin");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -227,7 +230,7 @@ LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		switch(lParam) {
 		case WM_LBUTTONDBLCLK:
 			m_bVisible = true;
-			//SetActiveWindow();
+			SetActiveWindow();
 			ShowWindow(SW_SHOW);
 			break;
 		case WM_RBUTTONDOWN:
@@ -259,7 +262,7 @@ void CDisplayTestDlg::OnPaint()
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
 		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
+		dc.DrawIcon(x, y, m_hIconS);
 	} else {
 		CDialog::OnPaint();
 	}
@@ -269,7 +272,7 @@ void CDisplayTestDlg::OnPaint()
 //  the minimized window.
 HCURSOR CDisplayTestDlg::OnQueryDragIcon()
 {
-	return static_cast<HCURSOR>(m_hIcon);
+	return static_cast<HCURSOR>(m_hIconS);
 }
 
 void CDisplayTestDlg::OnDestroy() 
@@ -398,6 +401,11 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 				SetTimer(103, 10000, NULL);
 			}	
 		}
+	}
+	if (nIDEvent == 109) {
+		// Освобождение памяти при запуске после 10 сек
+		KillTimer(nIDEvent);
+		SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
 	}
  
 	CDialog::OnTimer(nIDEvent);

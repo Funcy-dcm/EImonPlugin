@@ -36,7 +36,8 @@ public:
 
 // Implementation
 protected:
-	HICON m_hIcon;
+	HICON m_hIconB;
+	HICON m_hIconS;
 
 	UINT_PTR m_uEqTimer;
 	UINT_PTR m_uEqTimer2;

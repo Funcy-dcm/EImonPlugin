@@ -76,7 +76,7 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 168, 81
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "О EImonPlugin"
+CAPTION "О программе EImonPlugin"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "EImonPlugin Версия 1.0",IDC_STATIC,48,26,89,8,SS_NOPREFIX
@@ -178,6 +178,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\EImonPlugin.ico"
+IDR_MAINFRAME1          ICON                    "res\\EImonPlugin16.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -202,7 +203,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ABOUTBOX            "&About EImonPlugin..."
+    IDS_ABOUTBOX            "О программе EImonPlugin"
 END
 
 #endif    // русский resources
