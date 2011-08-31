@@ -232,8 +232,7 @@ LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
 
 void CDisplayTestDlg::OnPaint()
 {
-	if (IsIconic())
-	{
+	if (IsIconic()) {
 		CPaintDC dc(this); // device context for painting
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -248,9 +247,7 @@ void CDisplayTestDlg::OnPaint()
 
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
+	} else {
 		CDialog::OnPaint();
 	}
 }
@@ -276,13 +273,12 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	CString str4;
 	int length;
 	static BOOL EMPConnectedT = FALSE;
-	static int curStr;
+	static int curStr = 0;
+	static int tt = 0;
 
-	if(nIDEvent == 101)
-	{
+	if(nIDEvent == 101) {
 		DSPEQDATA eqData;
-		for(int i=0; i<16;i++)
-		{
+		for(int i=0; i<16;i++) {
 			eqData.BandData[i] = rand()%100;
 		}
 		IMON_Display_SetVfdEqData(&eqData);
@@ -355,10 +351,18 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			
 			str3 = empClient->lastMsg_t;
 			length = str3.GetLength();
-			if (length > 16){
-				str1 = str3.Right(length - curStr);
-				if (curStr < length) curStr++;
-				else curStr = 0;
+			if (length > 16) {
+				if (tt >= 3) {
+					str1 = str3.Right(length - curStr);
+					if ((curStr < length) && ((length - curStr) > 14)) curStr++;
+					else {
+						curStr = 0;
+						tt = 0;
+					}
+				} else {
+					tt++;
+					str1 = str3;
+				}
 			} else str1 = str3;
 
 			if (m_bVfdConnected)
@@ -368,6 +372,7 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 		if (EMPConnectedT != empClient->m_bEMPConnected) {
 			EMPConnectedT = empClient->m_bEMPConnected;
 			curStr = 0;
+			tt = 0;
 			if (EMPConnectedT) {
 				KillTimer(103);
 				viewvfd = EMPINFO;

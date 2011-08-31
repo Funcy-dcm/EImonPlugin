@@ -11,7 +11,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#define MAX_BUFF 20000
+#define MAX_BUFF 1000
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
