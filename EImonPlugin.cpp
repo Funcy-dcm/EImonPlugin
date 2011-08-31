@@ -36,8 +36,22 @@ CDisplayTestApp theApp;
 
 BOOL CDisplayTestApp::InitInstance()
 {
-	if (!AfxSocketInit())
-	{
+	// ѕровер€ем на запуск второй копии приложени€
+	HWND hWnd;
+	hWnd=::FindWindow(NULL,L"EImonPlugin");
+	if (hWnd) {
+		if (IsIconic(hWnd))
+		ShowWindow(hWnd,SW_RESTORE);
+		SetForegroundWindow(hWnd);
+		return FALSE;
+	}
+	// ”станавливаем низкий приоритет
+	HANDLE procHandle = GetCurrentProcess();
+	if (!SetPriorityClass(procHandle, IDLE_PRIORITY_CLASS)) {
+		//RET_ERR("SetPriorityClass");
+	}
+
+	if (!AfxSocketInit()) {
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return FALSE;
 	}

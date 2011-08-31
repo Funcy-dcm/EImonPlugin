@@ -76,13 +76,13 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 168, 81
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About EImonPlugin"
+CAPTION "О EImonPlugin"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "EImonPlugin Version 1.0",IDC_STATIC,48,26,89,8,SS_NOPREFIX
+    LTEXT           "EImonPlugin Версия 1.0",IDC_STATIC,48,26,89,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2011",IDC_STATIC,55,37,69,8
     DEFPUSHBUTTON   "OK",IDOK,59,58,50,16,BS_CENTER | BS_VCENTER | WS_GROUP
-    ICON            IDR_MAINFRAME,IDC_STATIC,15,26,21,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,15,26,20,20
 END
 
 IDD_EIMONPLUGIN_DIALOG DIALOGEX 0, 0, 303, 108
@@ -110,8 +110,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,6
- PRODUCTVERSION 1,0,0,6
+ FILEVERSION 1,0,0,7
+ PRODUCTVERSION 1,0,0,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -128,12 +128,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Egor"
             VALUE "FileDescription", "IMON Display Plugin"
-            VALUE "FileVersion", "1.0.0.6"
+            VALUE "FileVersion", "1.0.0.7"
             VALUE "InternalName", "EImonPlugin.exe"
             VALUE "LegalCopyright", "Copyright (C) 2011"
             VALUE "OriginalFilename", "EImonPlugin.exe"
             VALUE "ProductName", "EImonPlugin"
-            VALUE "ProductVersion", "1.0.0.6"
+            VALUE "ProductVersion", "1.0.0.7"
         END
     END
     BLOCK "VarFileInfo"
@@ -178,6 +178,22 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\EImonPlugin.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "EImonPlugin"
+    BEGIN
+        MENUITEM "О программе",                 ID_APP_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "Выход",                       ID_APP_EXIT
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

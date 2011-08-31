@@ -113,12 +113,15 @@ void CDisplayTestDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDisplayTestDlg, CDialog)
+	ON_WM_CLOSE()
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	ON_WM_WINDOWPOSCHANGING()
+	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
+	ON_COMMAND(ID_APP_EXIT, OnAppExit)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButtonInit)
 	ON_BN_CLICKED(IDC_BUTTON2, OnBnClickedButtonVfdSendText)
@@ -185,6 +188,12 @@ BOOL CDisplayTestDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+void CDisplayTestDlg::OnClose()
+{
+	TrayMessage(this->GetSafeHwnd(), NIM_DELETE, 0, 0, 0);
+	CDialog::OnClose();
+}
+
 void CDisplayTestDlg::OnWindowPosChanging(WINDOWPOS FAR* pos)
 {
 	if(!m_bVisible)
@@ -205,7 +214,7 @@ void CDisplayTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		ShowWindow(SW_HIDE);
         break;
 	case SC_CLOSE:
-		TrayMessage(this->GetSafeHwnd(), NIM_DELETE, 0, 0, 0);
+		
     default:
         CDialog::OnSysCommand(nID, lParam);
     }
@@ -218,7 +227,11 @@ LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		switch(lParam) {
 		case WM_LBUTTONDBLCLK:
 			m_bVisible = true;
+			//SetActiveWindow();
 			ShowWindow(SW_SHOW);
+			break;
+		case WM_RBUTTONDOWN:
+			HandlePopupMenu (this->GetSafeHwnd()); //рисуем меню от координат курсора
 			break;
 		}
 		break;
@@ -352,12 +365,15 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			str3 = empClient->lastMsg_t;
 			length = str3.GetLength();
 			if (length > 16) {
-				if (tt >= 3) {
-					str1 = str3.Right(length - curStr);
-					if ((curStr < length) && ((length - curStr) > 14)) curStr++;
-					else {
+				if (tt >= 2) {
+					str3.AppendFormat(L"   ");
+					str1 = str3.Right(length+3 - curStr);
+					str1.AppendFormat(str3);
+					if (curStr < length+2) {
+						curStr++;
+					} else {
 						curStr = 0;
-						tt = 0;
+						//tt = 0;
 					}
 				} else {
 					tt++;
@@ -410,6 +426,21 @@ void CALLBACK OnTimer1(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime)
 		dlg->OnConnImap();
 	}
  }
+
+void CDisplayTestDlg::HandlePopupMenu (HWND hWnd)
+{
+	HMENU hMenu;
+	HMENU hPopup;
+	POINT point;
+
+	hMenu = LoadMenu (AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_MENU1));
+	if (!hMenu) return;
+	hPopup = GetSubMenu (hMenu, 0);
+	if(!hPopup)	return;
+	GetCursorPos(&point);          //вычисляем текущее положение курсора
+	TrackPopupMenu (hPopup, 0, point.x, point.y, 0, hWnd, NULL);
+	DestroyMenu (hMenu);
+}
 
 void CDisplayTestDlg::OnBnClickedButtonInit()
 {
@@ -570,4 +601,15 @@ void CDisplayTestDlg::OnConnEMP()
 	} else {
 		EMPConnectedT = TRUE;
 	}
+}
+
+void CDisplayTestDlg::OnAppAbout()
+{
+	CAboutDlg dlgAbout;
+	dlgAbout.DoModal();
+}
+
+void CDisplayTestDlg::OnAppExit()
+{
+	SendMessage(WM_CLOSE, 0, 0);
 }

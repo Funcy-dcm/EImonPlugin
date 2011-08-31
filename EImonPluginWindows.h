@@ -23,7 +23,7 @@ public:
 	CDisplayTestDlg(CWnd* pParent = NULL);	// standard constructor
 
 // Dialog Data
-	enum { IDD = IDD_DISPLAYTEST_DIALOG };
+	enum { IDD = IDD_EIMONPLUGIN_DIALOG };
 	CString m_strLine1;
 	CString m_strLine2;
 	void OnConnImap();
@@ -49,6 +49,7 @@ protected:
 	// Generated message map functions
 	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* pos);
 	virtual BOOL OnInitDialog();
+	afx_msg void OnClose();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
@@ -62,6 +63,9 @@ protected:
 
 	afx_msg LRESULT OnDisplayPluginNotify(WPARAM, LPARAM);
 	afx_msg LRESULT CDisplayTestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	void HandlePopupMenu (HWND hwnd);
+	void OnAppAbout();
+	void OnAppExit();
 
 private:
 	bool m_bVisible;
