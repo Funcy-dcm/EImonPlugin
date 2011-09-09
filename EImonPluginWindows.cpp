@@ -230,8 +230,8 @@ LRESULT CDisplayTestDlg::DefWindowProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		switch(lParam) {
 		case WM_LBUTTONDBLCLK:
 			m_bVisible = true;
-			SetActiveWindow();
-			ShowWindow(SW_SHOW);
+			ShowWindow(SW_SHOWNORMAL);
+			SetForegroundWindow();
 			break;
 		case WM_RBUTTONDOWN:
 			HandlePopupMenu (this->GetSafeHwnd()); //рисуем меню от координат курсора
@@ -291,6 +291,7 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 	static BOOL EMPConnectedT = FALSE;
 	static int curStr = 0;
 	static int tt = 0;
+	static int newmail[2];
 
 	if(nIDEvent == 101) {
 		DSPEQDATA eqData;
@@ -334,6 +335,13 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 				if (m_bVfdConnected)
 					IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 				SetTimer(103, 3000, NULL);
+				
+				if ((pop3d->GetNumMsg() != newmail[1]) || (pop3->GetNumMsg() != newmail[0])) {
+					newmail[0] = pop3->GetNumMsg();
+					newmail[1] = pop3d->GetNumMsg();
+					Beep(700,300);
+					Beep(700,300);
+				}
 				break;
 			case MAIL: 
 				viewvfd = TIME;
