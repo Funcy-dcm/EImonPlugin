@@ -18,8 +18,11 @@
 #define IDC_BUTTON3                     1004
 #define IDC_STATIC_INFO                 1005
 #define IDC_STATIC_INFO2                1006
+#define IDC_STATIC0                     1059
+#define IDC_STATIC1                     1060
+#define IDC_STATIC2                     1061
 #define ID_1212_123                     32771
-#define ID_EIMONPLUGIN		            32772
+#define ID_EIMONPLUGIN                  32772
 #define ID_APP_QUIT                     32773
 
 // Next default values for new objects
@@ -28,7 +31,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32774
-#define _APS_NEXT_CONTROL_VALUE         1059
+#define _APS_NEXT_CONTROL_VALUE         1062
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -74,15 +74,20 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 168, 81
+IDD_ABOUTBOX DIALOGEX 0, 0, 162, 100
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "О программе EImonPlugin"
-FONT 8, "MS Shell Dlg", 0, 0, 0x1
+FONT 8, "Verdana", 0, 0, 0x1
 BEGIN
-    LTEXT           "EImonPlugin Версия 1.0",IDC_STATIC,48,26,89,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2011",IDC_STATIC,55,37,69,8
-    DEFPUSHBUTTON   "OK",IDOK,59,58,50,16,BS_CENTER | BS_VCENTER | WS_GROUP
-    ICON            IDR_MAINFRAME,IDC_STATIC,15,26,20,20
+    LTEXT           "EImonPlugin",IDC_STATIC1,48,12,108,12,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2011 by Shilyaev Egor",IDC_STATIC0,6,54,150,8
+    DEFPUSHBUTTON   "OK",IDOK,105,77,50,16,BS_CENTER | BS_VCENTER | WS_GROUP
+    ICON            IDR_MAINFRAME,IDC_STATIC,12,12,21,20
+    CONTROL         "v1.0.0.1",IDC_STATIC2,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,48,24,108,8
+    CONTROL         "-------------------------------------\037--------------------",IDC_STATIC,
+                    "Static",SS_LEFTNOWORDWRAP | WS_DISABLED | WS_GROUP,6,42,150,8
+    CONTROL         "-------------------------------------\037--------------------",IDC_STATIC,
+                    "Static",SS_LEFTNOWORDWRAP | WS_DISABLED | WS_GROUP,6,66,150,8
 END
 
 IDD_EIMONPLUGIN_DIALOG DIALOGEX 0, 0, 303, 108
@@ -108,10 +113,10 @@ END
 //
 // Version
 //
-
+#include "VersionNo.h"
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,8
- PRODUCTVERSION 1,0,0,8
+ FILEVERSION FILEVER
+ PRODUCTVERSION PRODUCTVER
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -126,14 +131,14 @@ BEGIN
     BEGIN
         BLOCK "080004e4"
         BEGIN
-            VALUE "CompanyName", "Egor"
-            VALUE "FileDescription", "IMON Display Plugin"
-            VALUE "FileVersion", "1.0.0.8"
-            VALUE "InternalName", "EImonPlugin.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2011"
-            VALUE "OriginalFilename", "EImonPlugin.exe"
-            VALUE "ProductName", "EImonPlugin"
-            VALUE "ProductVersion", "1.0.0.8"
+            VALUE "CompanyName", "Egor\0"
+            VALUE "FileDescription", "IMON Display Plugin\0"
+            VALUE "FileVersion", STRFILEVER
+            VALUE "InternalName", "EImonPlugin.exe\0"
+            VALUE "LegalCopyright", "Copyright (C) 2011\0"
+            VALUE "OriginalFilename", "EImonPlugin.exe\0"
+            VALUE "ProductName", "EImonPlugin\0"
+            VALUE "ProductVersion", STRPRODUCTVER
         END
     END
     BLOCK "VarFileInfo"
@@ -154,9 +159,9 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 161
+        RIGHTMARGIN, 155
         TOPMARGIN, 7
-        BOTTOMMARGIN, 74
+        BOTTOMMARGIN, 93
     END
 
     IDD_EIMONPLUGIN_DIALOG, DIALOG

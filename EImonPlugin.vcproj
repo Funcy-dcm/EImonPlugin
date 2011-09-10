@@ -263,6 +263,10 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
+			<File
+				RelativePath=".\VersionNo.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="res"

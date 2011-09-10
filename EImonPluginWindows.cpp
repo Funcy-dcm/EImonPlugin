@@ -5,7 +5,12 @@
 #include "EImonPlugin.h"
 #include "EImonPluginWindows.h"
 #include "IMAP.h"
+#include "VersionNo.h"
 #include <psapi.h>
+
+#pragma hdrstop
+   #include "process.h"
+   #include <tlhelp32.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -63,6 +68,9 @@ public:
 
 // Implementation
 protected:
+	CFont m_fntCaptionFont;
+
+	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -78,6 +86,29 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
+
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	CWnd *pCaption = GetDlgItem(IDC_STATIC1);
+	CFont *pFont = pCaption->GetFont();
+	
+	// получаем описание страрого шрифта и редактируем его
+	LOGFONT lf;
+	pFont->GetObject(sizeof(lf), &lf);
+	lf.lfHeight = lf.lfHeight*3/2; // увеличиваем высоту в полтора раза
+	lf.lfWeight = FW_BOLD; // делаем жирным
+
+	// создаём новый шрифт из исправленного описания
+	m_fntCaptionFont.CreateFontIndirect(&lf);
+	pCaption->SetFont(&m_fntCaptionFont);
+
+	CString str;
+	str.Format(L"v%S", STRFILEVER);
+	GetDlgItem(IDC_STATIC2)->SetWindowText(str);
+	return TRUE;
+}
 
 
 // CDisplayTestDlg dialog
@@ -336,11 +367,19 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 					IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 				SetTimer(103, 3000, NULL);
 				
-				if ((pop3d->GetNumMsg() != newmail[1]) || (pop3->GetNumMsg() != newmail[0])) {
-					newmail[0] = pop3->GetNumMsg();
+				if (pop3d->GetNumMsg() != newmail[1]) {
+					if (pop3d->GetNumMsg() != 0) {
+						Beep(700,300);
+						Beep(700,300);					
+					}
 					newmail[1] = pop3d->GetNumMsg();
-					Beep(700,300);
-					Beep(700,300);
+				}
+				if ((pop3->GetNumMsg() != newmail[0])) {
+					if (pop3->GetNumMsg() != 0) {
+						Beep(700,300);
+						Beep(700,300);					
+					}
+					newmail[0] = pop3->GetNumMsg();	
 				}
 				break;
 			case MAIL: 
@@ -414,6 +453,26 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 		// Освобождение памяти при запуске после 10 сек
 		KillTimer(nIDEvent);
 		SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
+
+		HANDLE hSnapshot;
+		PROCESSENTRY32 pe = {sizeof(pe)};
+		DWORD id = 0;
+		LPWSTR szProcessName(L"iMON.exe");
+		hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		if (hSnapshot != INVALID_HANDLE_VALUE){
+			if (Process32First(hSnapshot, &pe)) {
+				while (Process32Next(hSnapshot, &pe)) {
+					if(!lstrcmpi(pe.szExeFile,szProcessName)) {
+						id = pe.th32ProcessID;
+						break;
+					}
+				}
+				hSnapshot = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+				if (hSnapshot) {
+					SetProcessWorkingSetSize(hSnapshot, (SIZE_T)-1, (SIZE_T)-1);
+				}
+			}
+		}
 	}
  
 	CDialog::OnTimer(nIDEvent);
