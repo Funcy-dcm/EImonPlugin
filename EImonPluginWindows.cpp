@@ -403,6 +403,48 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 		OnConnImap();
 	}
 	if (nIDEvent == 108) {
+		if (EMPConnectedT != empClient->m_bEMPConnected) {
+			EMPConnectedT = empClient->m_bEMPConnected;
+			curStr = 0;
+			tt = 0;
+			if (EMPConnectedT) {
+				KillTimer(103);
+				viewvfd = EMPINFO;
+				empClient->SendInfo();
+				SetTimer(110, 350, NULL);
+			} else {
+				KillTimer(110);
+				viewvfd = TIME;
+				SetTimer(103, 10000, NULL);
+			}	
+		}
+	}
+	if (nIDEvent == 109) {
+		// Освобождение памяти при запуске после 10 сек
+		KillTimer(nIDEvent);
+		SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
+
+		HANDLE hSnapshot;
+		PROCESSENTRY32 pe = {sizeof(pe)};
+		DWORD id = 0;
+		LPWSTR szProcessName(L"iMON.exe");
+		hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		if (hSnapshot != INVALID_HANDLE_VALUE){
+			if (Process32First(hSnapshot, &pe)) {
+				while (Process32Next(hSnapshot, &pe)) {
+					if(!lstrcmpi(pe.szExeFile,szProcessName)) {
+						id = pe.th32ProcessID;
+						break;
+					}
+				}
+				hSnapshot = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+				if (hSnapshot) {
+					SetProcessWorkingSetSize(hSnapshot, (SIZE_T)-1, (SIZE_T)-1);
+				}
+			}
+		}
+	}
+	if (nIDEvent == 110) {
 		if (EMPConnectedT) {
 			WORD sec = (WORD)(empClient->currentTime/1000);
 			WORD min = sec/60;
@@ -434,44 +476,6 @@ void CDisplayTestDlg::OnTimer(UINT nIDEvent)
 			if (m_bVfdConnected)
 				IMON_Display_SetVfdText((LPCTSTR)str1, (LPCTSTR)str2);
 			empClient->SendInfo();
-		}
-		if (EMPConnectedT != empClient->m_bEMPConnected) {
-			EMPConnectedT = empClient->m_bEMPConnected;
-			curStr = 0;
-			tt = 0;
-			if (EMPConnectedT) {
-				KillTimer(103);
-				viewvfd = EMPINFO;
-				empClient->SendInfo();
-			} else {
-				viewvfd = TIME;
-				SetTimer(103, 10000, NULL);
-			}	
-		}
-	}
-	if (nIDEvent == 109) {
-		// Освобождение памяти при запуске после 10 сек
-		KillTimer(nIDEvent);
-		SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
-
-		HANDLE hSnapshot;
-		PROCESSENTRY32 pe = {sizeof(pe)};
-		DWORD id = 0;
-		LPWSTR szProcessName(L"iMON.exe");
-		hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (hSnapshot != INVALID_HANDLE_VALUE){
-			if (Process32First(hSnapshot, &pe)) {
-				while (Process32Next(hSnapshot, &pe)) {
-					if(!lstrcmpi(pe.szExeFile,szProcessName)) {
-						id = pe.th32ProcessID;
-						break;
-					}
-				}
-				hSnapshot = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
-				if (hSnapshot) {
-					SetProcessWorkingSetSize(hSnapshot, (SIZE_T)-1, (SIZE_T)-1);
-				}
-			}
 		}
 	}
  

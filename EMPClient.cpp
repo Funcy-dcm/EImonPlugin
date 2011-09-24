@@ -72,7 +72,7 @@ void CEMPClient::OnReceive(int err)
 		}
 		if (lastMsg == "*OK") {
 			m_bEMPConnected = TRUE;
-			lastMsg_t = "";
+			lastMsg_t = "      EMP";
 			currentTime = 0;
 			totalTime = 0;
 			SendInfo();
@@ -86,6 +86,9 @@ void CEMPClient::OnClose(int err)
 {
 	CAsyncSocket::Close();
 	m_bEMPConnected = FALSE;
+	lastMsg_t = "      EMP";
+	currentTime = 0;
+	totalTime = 0;
 }
 
 void CEMPClient::SendInfo()
